@@ -27,7 +27,7 @@ import {
     }
   ];
   
-  // Define Lead type
+  // Define Lead
   const LeadType = new GraphQLObjectType({
     name: 'Lead',
     fields: {

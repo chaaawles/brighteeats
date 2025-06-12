@@ -64,6 +64,17 @@ import {
     }
   });
   
+  // Validation functions
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validateMobile = (mobile: string): boolean => {
+    const mobileRegex = /^\d{10}$/;
+    return mobileRegex.test(mobile);
+  };
+
   // Mutation
   const RootMutation = new GraphQLObjectType({
     name: 'Mutation',
@@ -82,6 +93,21 @@ import {
           }
         },
         resolve: (_parent, args) => {
+          // Validate email
+          if (!validateEmail(args.email)) {
+            throw new Error('Invalid email format');
+          }
+
+          // Validate mobile
+          if (!validateMobile(args.mobile)) {
+            throw new Error('Invalid mobile number format');
+          }
+
+          // Validate services
+          if (args.services.length === 0) {
+            throw new Error('Services array cannot be empty');
+          }
+
           const newLead = {
             id: String(leads.length + 1),
             ...args

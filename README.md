@@ -1,4 +1,4 @@
-# Brighte Eats - Lead Generation API
+# Brighte Assignment - Lead Generation API
 
 TypeScript + GraphQL API for managing lead generation.
 

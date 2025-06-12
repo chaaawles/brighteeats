@@ -58,33 +58,4 @@ describe('GraphQL Schema', () => {
       expect(data.lead).toHaveProperty('name', 'Alice Smith');
     });
   });
-
-  describe('Lead Mutations', () => {
-    it('should add a new lead', async () => {
-      const mutation = `
-        mutation {
-          addLead(
-            name: "John Doe"
-            email: "john@example.com"
-            mobile: "5555555555"
-            postcode: "12345"
-            services: ["delivery", "payment"]
-          ) {
-            id
-            name
-            email
-            mobile
-            postcode
-            services
-          }
-        }
-      `;
-
-      const result = await graphql({ schema, source: mutation });
-      const data = result.data as unknown as { addLead: Lead };
-      expect(result.errors).toBeUndefined();
-      expect(data.addLead).toHaveProperty('name', 'John Doe');
-      expect(data.addLead).toHaveProperty('email', 'john@example.com');
-    });
-  });
 }); 

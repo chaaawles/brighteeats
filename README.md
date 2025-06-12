@@ -198,11 +198,3 @@ src/
 │   └── mutations.test.ts # Mutation tests
 └── index.ts           # Application entry point
 ```
-
-## License
-
-[Your License]
-
-## Author
-
-[Your Name] 

@@ -2,6 +2,8 @@ import { graphql } from 'graphql';
 import { schema } from '../schema/schema';
 
 describe('Lead Mutations', () => {
+  let createdLeadId: string;
+
   it('should successfully add a new lead with valid data', async () => {
     const mutation = `
       mutation {
@@ -23,7 +25,7 @@ describe('Lead Mutations', () => {
     `;
 
     const result = await graphql({ schema, source: mutation });
-    
+
     expect(result.errors).toBeUndefined();
     expect(result.data?.addLead).toMatchObject({
       name: 'John Doe',
@@ -32,6 +34,51 @@ describe('Lead Mutations', () => {
       postcode: '12345',
       services: ['delivery', 'payment']
     });
+
+    // Save ID for later update/delete tests
+    createdLeadId = (result.data as { addLead: { id: string } }).addLead.id;
+  });
+
+  it('should update the lead with new values', async () => {
+    const mutation = `
+      mutation {
+        updateLead(
+          id: "${createdLeadId}"
+          name: "John Updated"
+          email: "john.updated@example.com"
+        ) {
+          id
+          name
+          email
+        }
+      }
+    `;
+
+    const result = await graphql({ schema, source: mutation });
+
+    expect(result.errors).toBeUndefined();
+    expect(result.data?.updateLead).toMatchObject({
+      id: createdLeadId,
+      name: 'John Updated',
+      email: 'john.updated@example.com'
+    });
+  });
+
+  it('should delete the lead', async () => {
+    const mutation = `
+      mutation {
+        deleteLead(id: "${createdLeadId}") {
+          id
+          name
+        }
+      }
+    `;
+
+    const result = await graphql({ schema, source: mutation });
+
+    expect(result.errors).toBeUndefined();
+    expect(result.data?.deleteLead).toHaveProperty('id', createdLeadId);
+    expect(result.data?.deleteLead).toHaveProperty('name');
   });
 
   it('should fail when required fields are missing', async () => {
@@ -112,4 +159,4 @@ describe('Lead Mutations', () => {
     const result = await graphql({ schema, source: mutation });
     expect(result.errors).toBeDefined();
   });
-}); 
+});

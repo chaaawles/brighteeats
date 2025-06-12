@@ -64,7 +64,7 @@ import {
     }
   });
   
-  // Validation functions
+  // Validation
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -79,6 +79,7 @@ import {
   const RootMutation = new GraphQLObjectType({
     name: 'Mutation',
     fields: {
+      // Add a new lead
       addLead: {
         type: LeadType,
         args: {
@@ -114,6 +115,51 @@ import {
           };
           leads.push(newLead);
           return newLead;
+        }
+      },
+  
+      // Patch an existing lead
+      updateLead: {
+        type: LeadType,
+        args: {
+          id: { type: new GraphQLNonNull(GraphQLID) },
+          name: { type: GraphQLString },
+          email: { type: GraphQLString },
+          mobile: { type: GraphQLString },
+          postcode: { type: GraphQLString },
+          services: { type: new GraphQLList(new GraphQLNonNull(GraphQLString)) }
+        },
+        resolve: (_parent, args) => {
+          const lead = leads.find(l => l.id === args.id);
+          if (!lead) {
+            throw new Error('Lead not found');
+          }
+  
+          // Only update provided fields
+          if (args.name !== undefined) lead.name = args.name;
+          if (args.email !== undefined) lead.email = args.email;
+          if (args.mobile !== undefined) lead.mobile = args.mobile;
+          if (args.postcode !== undefined) lead.postcode = args.postcode;
+          if (args.services !== undefined) lead.services = args.services;
+  
+          return lead;
+        }
+      },
+  
+      // Delete a lead by ID
+      deleteLead: {
+        type: LeadType,
+        args: {
+          id: { type: new GraphQLNonNull(GraphQLID) }
+        },
+        resolve: (_parent, args) => {
+          const index = leads.findIndex(l => l.id === args.id);
+          if (index === -1) {
+            throw new Error('Lead not found');
+          }
+  
+          const [deleted] = leads.splice(index, 1);
+          return deleted;
         }
       }
     }

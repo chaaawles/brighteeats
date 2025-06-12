@@ -1,10 +1,23 @@
-import express from 'express'; // yarn add express
-import { createHandler } from 'graphql-http/lib/use/express';
+import express from 'express';
 import { schema } from './schema/schema';
+import { createHandler } from 'graphql-http/lib/use/express';
 
 const app = express();
 
-app.listen(3000, () => {
-    console.log("Server is running on port 3000");
+app.use('/graphql', createHandler({ schema }));
+
+// Optionally serve GraphiQL
+app.get('/', (_req, res) => {
+  res.send(`
+    <html>
+      <body>
+        <a href="/graphql">Go to /graphql</a>
+      </body>
+    </html>
+  `);
 });
 
+const PORT = 4000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);
+});

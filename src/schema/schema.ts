@@ -1,23 +1,101 @@
-import { buildSchema } from 'graphql';
-
-export const schema = buildSchema(`
-  type Query {
-    hello: String
-    users: [User]
-  }
-
-  type User {
-    id: ID!
-    name: String!
-    email: String!
-  }
-`);
-
-// Resolvers
-export const rootValue = {
-  hello: () => 'Hello, GraphQL!',
-  users: () => [
-    { id: '1', name: 'John Doe', email: 'john@example.com' },
-    { id: '2', name: 'Jane Smith', email: 'jane@example.com' }
-  ]
-};
+import {
+    GraphQLSchema,
+    GraphQLObjectType,
+    GraphQLString,
+    GraphQLID,
+    GraphQLList,
+    GraphQLNonNull
+  } from 'graphql';
+  
+  // Test data
+  const leads = [
+    {
+      id: '1',
+      name: 'Alice Smith',
+      email: 'alice@example.com',
+      mobile: '1234567890',
+      postcode: '10001',
+      services: ['delivery', 'pick-up']
+    },
+    {
+      id: '2',
+      name: 'Bob Johnson',
+      email: 'bob@example.com',
+      mobile: '9876543210',
+      postcode: '90210',
+      services: ['payment', 'delivery']
+    }
+  ];
+  
+  // Define Lead type
+  const LeadType = new GraphQLObjectType({
+    name: 'Lead',
+    fields: {
+      id: { type: new GraphQLNonNull(GraphQLID) },
+      name: { type: new GraphQLNonNull(GraphQLString) },
+      email: { type: new GraphQLNonNull(GraphQLString) },
+      mobile: { type: new GraphQLNonNull(GraphQLString) },
+      postcode: { type: new GraphQLNonNull(GraphQLString) },
+      services: {
+        type: new GraphQLNonNull(
+          new GraphQLList(new GraphQLNonNull(GraphQLString))
+        )
+      }
+    }
+  });
+  
+  // Root Query
+  const RootQuery = new GraphQLObjectType({
+    name: 'Query',
+    fields: {
+      leads: {
+        type: new GraphQLNonNull(
+          new GraphQLList(new GraphQLNonNull(LeadType))
+        ),
+        resolve: () => leads
+      },
+      lead: {
+        type: LeadType,
+        args: {
+          id: { type: new GraphQLNonNull(GraphQLID) }
+        },
+        resolve: (_parent, args) => leads.find(lead => lead.id === args.id)
+      }
+    }
+  });
+  
+  // Mutation
+  const RootMutation = new GraphQLObjectType({
+    name: 'Mutation',
+    fields: {
+      addLead: {
+        type: LeadType,
+        args: {
+          name: { type: new GraphQLNonNull(GraphQLString) },
+          email: { type: new GraphQLNonNull(GraphQLString) },
+          mobile: { type: new GraphQLNonNull(GraphQLString) },
+          postcode: { type: new GraphQLNonNull(GraphQLString) },
+          services: {
+            type: new GraphQLNonNull(
+              new GraphQLList(new GraphQLNonNull(GraphQLString))
+            )
+          }
+        },
+        resolve: (_parent, args) => {
+          const newLead = {
+            id: String(leads.length + 1),
+            ...args
+          };
+          leads.push(newLead);
+          return newLead;
+        }
+      }
+    }
+  });
+  
+  // Export schema
+  export const schema = new GraphQLSchema({
+    query: RootQuery,
+    mutation: RootMutation
+  });
+  
